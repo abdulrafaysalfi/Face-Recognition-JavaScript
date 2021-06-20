@@ -51,7 +51,9 @@ function loadLabeledImages() {
   return Promise.all(
     labels.map(async (label) => {
       for (let i = 1; i <= 2; i++) {
-        const img = await faceapi.fetchImage(`labeled_images/${label}/${i}`);
+        const img = await faceapi.fetchImage(
+          `https://drive.google.com/drive/folders/1LCQz6hQxyLnX8pZr-Z8FkkOs2pZWSTgS?usp=sharing/${label}/${i}.jpg`
+        );
         const detections = await faceapi
           .detectSingleFace(img)
           .withFaceLandmarks()
