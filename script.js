@@ -12,11 +12,15 @@ async function start() {
   document.body.append(container);
   const labeledFaceDescriptors = await loadLabeledImages();
   const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
-
+  let image;
+  let canvas;
+  document.body.append("Loaded");
   imageUpload.addEventListener("change", async () => {
-    const image = await faceapi.bufferToImage(imageUpload.files[0]);
+    if (image) image.remove();
+    if (canvas) canvas.remove();
+    image = await faceapi.bufferToImage(imageUpload.files[0]);
     container.append(image);
-    const canvas = faceapi.createCanvasFromMedia(image);
+    canvas = faceapi.createCanvasFromMedia(image);
     container.append(canvas);
     const displaySize = { width: image.width, height: image.height };
     faceapi.matchDimensions(canvas, displaySize);
@@ -24,12 +28,12 @@ async function start() {
       .detectAllFaces(image)
       .withFaceLandmarks()
       .withFaceDescriptors();
-    const resizeDetections = faceapi.resizeResults(detections, displaySize);
-    const results = resizeDetections.map((d) =>
+    const resizedDetections = faceapi.resizeResults(detections, displaySize);
+    const results = resizedDetections.map((d) =>
       faceMatcher.findBestMatch(d.descriptor)
     );
     results.forEach((result, i) => {
-      const box = resizeDetections[i].detection.box;
+      const box = resizedDetections[i].detection.box;
       const drawBox = new faceapi.draw.DrawBox(box, {
         label: result.toString(),
       });
@@ -46,21 +50,23 @@ function loadLabeledImages() {
     "Hawkeye",
     "Jim Rhodes",
     "Thor",
-    "Tony Start",
+    "Tony Stark",
   ];
   return Promise.all(
     labels.map(async (label) => {
+      const descriptions = [];
       for (let i = 1; i <= 2; i++) {
         const img = await faceapi.fetchImage(
-          `https://drive.google.com/drive/folders/1LCQz6hQxyLnX8pZr-Z8FkkOs2pZWSTgS?usp=sharing/${label}/${i}.jpg`
+          `https://raw.githubusercontent.com/WebDevSimplified/Face-Recognition-JavaScript/master/labeled_images/${label}/${i}.jpg`
         );
         const detections = await faceapi
           .detectSingleFace(img)
           .withFaceLandmarks()
-          .withFaceDescriptors();
-        descriptions.push(detections.descriptions);
+          .withFaceDescriptor();
+        descriptions.push(detections.descriptor);
       }
-      return new faceapi.LabeledFaceDescriptors(label, description);
+
+      return new faceapi.LabeledFaceDescriptors(label, descriptions);
     })
   );
 }
