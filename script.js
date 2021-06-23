@@ -44,9 +44,11 @@ async function start() {
 
 function loadLabeledImages() {
   const labels = [
+    "Abdul Rafay",
     "Black Widow",
     "Captain America",
     "Captain Marvel",
+    "Danish Shoukat",
     "Hawkeye",
     "Jim Rhodes",
     "Thor",
